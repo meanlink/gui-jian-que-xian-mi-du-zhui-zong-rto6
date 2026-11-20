@@ -11,6 +11,8 @@ class Job(Base):
     result: Mapped[dict] = mapped_column(JSON, default=dict)
     error: Mapped[str] = mapped_column(String(1000), default='')
     approved: Mapped[bool] = mapped_column(Boolean, default=False)
+    calibration_version: Mapped[int] = mapped_column(default=0)
+    calibration_snapshot: Mapped[dict] = mapped_column(JSON, default=dict)
     created_by: Mapped[int] = mapped_column(ForeignKey('users.id'))
     created_at: Mapped[float] = mapped_column(Double)
     finished_at: Mapped[float | None] = mapped_column(Double, nullable=True)

@@ -3,8 +3,8 @@
 密度聚类的真实业务分析小型项目。完整模拟客户、痛点、上下游、算法公式与一天工作剧本见 [BUSINESS.md](BUSINESS.md)。
 
 ## 模块与业务流程
-数据接入（JSON/CSV、字段验证、批次指纹）→ 参数化分析（异步 Python worker）→ 结果复核（指标、图形、明细、解释、批准）→ 定时分发（本地收件箱、CSV/JSON、SHA256）；另有业务总览和审计轨迹。
-三个贯穿全栈的实体：Dataset 数据批次、Job 分析任务、Report 分发计划；辅助 User、Audit、Delivery。
+数据接入（JSON/CSV、字段验证、批次指纹、里程校准版本）→ 参数化分析（异步 Python worker，按创建时固定的完整校准快照计算）→ 结果复核（确认缺陷带、待复核点、孤立点、解释、批准）→ 定时分发（本地收件箱、CSV/JSON、SHA256，只含确认缺陷带）；另有业务总览和审计轨迹。
+三个贯穿全栈的实体：Dataset 数据批次、Job 分析任务、Report 分发计划；辅助 Calibration 里程校准、User、Audit、Delivery。
 
 ## 快速启动
 ```bash
@@ -34,6 +34,7 @@ Role 枚举：admin/analyst/viewer；JobStatus：queued/running/completed/failed
 ## 环境变量与 Docker
 COMPOSE_PROJECT_NAME=rail-density；FRONTEND_PORT=18210；BACKEND_PORT=19210；DB_PORT=17710；DB_PASSWORD、JWT_SECRET 见 .env.example；SEED_DEMO 默认 true。共享命名产物卷供后端下载与 worker 写入，数据库/Redis 各持久卷。
 恰好五服务均有健康检查。Redis 队列加 SQL 排队状态兜底；worker 按 next_run 生成本地收件箱文件。周期 60 秒至 30 天。分发结果为批准分析的固定快照；若需新数据重新计算并建立新计划。当前不连接邮件或企业聊天。
+里程校准按批次累积版本：创建试验时一次性固定一套完整校准，并发更新不会混用版本；计算中断恢复仍用原快照；校准更新后旧试验可查，引用旧校准且尚未发布的简报停止发布。
 错误响应、请求编号、Redis 每 IP 每分钟 240 次限流、JWT 和数据库操作审计。演示密钥与密码仅供本机模拟；生产部署前配置独立密钥与账号。
 
 ## 数据与验收
